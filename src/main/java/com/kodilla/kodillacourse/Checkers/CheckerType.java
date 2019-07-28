@@ -18,4 +18,3 @@ public enum CheckerType {
         return checkerColor;
     }
 }
-

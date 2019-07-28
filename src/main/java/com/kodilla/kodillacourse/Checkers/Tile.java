@@ -1,6 +1,5 @@
 package com.kodilla.kodillacourse.Checkers;
 
-
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
@@ -27,7 +26,7 @@ public class Tile extends Rectangle {
         setWidth(size);
         setHeight(size);
 
-        relocate(x *CheckersApp.tileSize, y*CheckersApp.tileSize);
+        relocate(x * size, y * size);
 
         Color color;
 
@@ -42,5 +41,3 @@ public class Tile extends Rectangle {
     }
 
 }
-
-
