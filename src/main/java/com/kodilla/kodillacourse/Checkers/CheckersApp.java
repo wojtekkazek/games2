@@ -7,6 +7,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
+import org.hibernate.validator.spi.scripting.ScriptEvaluatorNotFoundException;
 
 public class CheckersApp extends Application {
 
@@ -80,12 +81,40 @@ public class CheckersApp extends Application {
         return new MoveResult((MoveType.none));
     }
 
+    private QueenMoveResult tryMoveQueen(Queen queen, int newX, int newY) {
+        if (board[newX][newY].hasChecker() || (newX + newY) %2 == 0) {
+            return new QueenMoveResult(MoveType.none);
+        }
+
+        if ((turnWhite && queen.getType() != QueenType.white) || (!(turnWhite) && queen.getType() == QueenType.white)) {
+            return new QueenMoveResult(MoveType.none);
+        }
+
+        int x0 = toBoard(queen.getOldX());
+        int y0 = toBoard(queen.getOldY());
+
+        if (Math.abs(newX - x0) == 1) {
+            return new QueenMoveResult(MoveType.normal);
+        } else if (Math.abs(newX - x0) == 2) {
+
+            int x1 = x0 + (newX - x0) / 2;
+            int y1 = y0 + (newY -y0) / 2;
+
+            if (board[x1][y1].hasChecker() && QueenType.valueOf(board[x1][y1].getChecker().getType().name()) != queen.getType()) {
+                return new QueenMoveResult(MoveType.kill, board[x1][y1].getChecker());
+            }
+        }
+
+        return new QueenMoveResult((MoveType.none));
+    }
+
     private int toBoard(double a) {
         return (int)(a + tileSize / 2) / tileSize;
     }
 
     private Checker makeChecker(CheckerType type, int x, int y) {
         Checker checker = new Checker(type, x, y);
+        QueenType queenType = QueenType.valueOf(checker.getType().name());
 
         checker.setOnMouseReleased(e -> {
             int newX = toBoard(checker.getLayoutX());
@@ -105,7 +134,13 @@ public class CheckersApp extends Application {
 
                     checker.move(newX, newY);
                     board[x0][y0].setChecker(null);
-                    board[newX][newY].setChecker(checker);
+                    if (newY == 7 || newY == 0) {
+                        checkersGroup.getChildren().remove(checker);
+                        Queen queen = makeQueen(queenType, newX , newY);
+                        checkersGroup.getChildren().add(queen);
+                    } else {
+                        board[newX][newY].setChecker(checker);
+                    }
                     turnWhite = !turnWhite;
                     break;
 
@@ -113,7 +148,13 @@ public class CheckersApp extends Application {
 
                     checker.move(newX, newY);
                     board[x0][y0].setChecker(null);
-                    board[newX][newY].setChecker(checker);
+                    if (newY == 7 || newY == 0) {
+                        checkersGroup.getChildren().remove(checker);
+                        Queen queen = new Queen(queenType, newX , newY);
+                        checkersGroup.getChildren().add(queen);
+                    } else {
+                        board[newX][newY].setChecker(checker);
+                    }
 
                     Checker killedChecker = result.getChecker();
                     board[toBoard(killedChecker.getOldX())][toBoard(killedChecker.getOldY())].setChecker(null);
@@ -126,6 +167,51 @@ public class CheckersApp extends Application {
 
         return checker;
     }
+
+    private Queen makeQueen(QueenType type, int x, int y) {
+        Queen queen = new Queen(type, x, y);
+
+        queen.setOnMouseReleased(e -> {
+            int newX = toBoard(queen.getLayoutX());
+            int newY = toBoard(queen.getLayoutY());
+
+            QueenMoveResult result = tryMoveQueen(queen, newX, newY);
+
+            int x0 = toBoard(queen.getOldX());
+            int y0 = toBoard(queen.getOldY());
+
+            switch (result.getType()) {
+                case none:
+                    queen.abortMove();
+                    break;
+
+                case normal:
+
+                    queen.move(newX, newY);
+                    board[x0][y0].setQueen(null);
+                    board[newX][newY].setQueen(queen);
+                    turnWhite = !turnWhite;
+                    break;
+
+                case kill:
+
+                    queen.move(newX, newY);
+                    board[x0][y0].setQueen(null);
+                    board[newX][newY].setQueen(queen);
+
+                    Checker killedChecker = result.getChecker();
+                    board[toBoard(killedChecker.getOldX())][toBoard(killedChecker.getOldY())].setChecker(null);
+                    checkersGroup.getChildren().remove(killedChecker);
+
+                    turnWhite = !turnWhite;
+                    break;
+
+            }
+        });
+        return queen;
+    }
+
+
 
     @Override
     public void start(Stage primaryStage) throws Exception {

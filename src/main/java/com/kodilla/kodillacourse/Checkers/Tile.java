@@ -9,9 +9,10 @@ import static javafx.scene.paint.Color.WHITE;
 public class Tile extends Rectangle {
 
     private Checker checker;
+    private Queen queen;
 
     public boolean hasChecker() {
-        return checker != null;
+        return checker != null && queen != null;
     }
 
     public Checker getChecker() {
@@ -20,6 +21,10 @@ public class Tile extends Rectangle {
 
     public void setChecker(Checker checker) {
         this.checker = checker;
+    }
+
+    public void setQueen(Queen queen) {
+        this.queen = queen;
     }
 
     public Tile(int size, boolean white, int x, int y) {
