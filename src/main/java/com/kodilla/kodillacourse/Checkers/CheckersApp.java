@@ -40,11 +40,11 @@ public class CheckersApp extends Application {
                 Checker checker = null;
 
                 if (y <= 2 && (x+y)%2 != 0) {
-                    checker = makeChecker(CheckerType.red, x, y);
+                    checker = makeChecker(CheckerType.RED, x, y);
                 }
 
                 if (y >= 5 && (x+y)%2 != 0) {
-                    checker = makeChecker(CheckerType.white, x, y);
+                    checker = makeChecker(CheckerType.WHITE, x, y);
                 }
 
                 if (checker != null) {
@@ -64,7 +64,7 @@ public class CheckersApp extends Application {
             return new MoveResult(MoveType.none);
         }
 
-        if ((turnWhite && checker.getType() != CheckerType.white) || (!(turnWhite) && checker.getType() == CheckerType.white)) {
+        if ((turnWhite && checker.getType() != CheckerType.WHITE) || (!(turnWhite) && checker.getType() == CheckerType.WHITE)) {
             return new MoveResult(MoveType.none);
         }
 
@@ -93,7 +93,7 @@ public class CheckersApp extends Application {
             return new QueenMoveResult(MoveType.none);
         }
 
-        if ((turnWhite && queen.getType() != QueenType.white) || (!(turnWhite) && queen.getType() == QueenType.white)) {
+        if ((turnWhite && queen.getType() != QueenType.WHITE) || (!(turnWhite) && queen.getType() == QueenType.WHITE)) {
             return new QueenMoveResult(MoveType.none);
         }
 

@@ -4,7 +4,7 @@ import javafx.scene.paint.Color;
 
 public enum QueenType {
 
-    red(1, Color.RED), white(-1, Color.WHITE);
+    RED(1, Color.RED), WHITE(-1, Color.WHITE);
 
     final int moveDir;
     final Color queenColor;

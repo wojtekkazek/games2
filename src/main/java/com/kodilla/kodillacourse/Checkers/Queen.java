@@ -8,8 +8,10 @@ import static com.kodilla.kodillacourse.Checkers.CheckersApp.tileSize;
 
 public class Queen extends StackPane {
     private QueenType type;
-    private double mouseX, mouseY;
-    private double oldX, oldY;
+    private double mouseX;
+    private double mouseY;
+    private double oldX;
+    private double oldY;
 
     public QueenType getType() {
         return type;
