@@ -179,7 +179,7 @@ public class CheckersApp extends Application {
                     board[x0][y0].setChecker(null);
                     if (newY == 7 || newY == 0) {
                         checkersGroup.getChildren().remove(checker);
-                        Queen queen = new Queen(queenType, newX , newY);
+                        Queen queen = makeQueen(queenType, newX , newY);
                         checkersGroup.getChildren().add(queen);
                     } else {
                         board[newX][newY].setChecker(checker);
