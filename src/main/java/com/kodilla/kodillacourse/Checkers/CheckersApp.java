@@ -249,21 +249,25 @@ public class CheckersApp extends Application {
         return queen;
     }
 
+    public boolean tileExists(int x, int y) {
+        return (x >=0 && x <= 7 & y >=0 & y <= 7);
+    }
+
     public boolean checkerCanKill(Checker checker) {
 
         int x0 = toBoard(checker.getOldX());
         int y0 = toBoard(checker.getOldY());
 
-        if (x0 + 1 >= 0 && x0 + 1 <= 7 && y0 + 1 * checker.getType().moveDir >= 0 && y0 + 1 * checker.getType().moveDir <= 7
-                && x0 + 2 >= 0 && x0 + 2 <= 7 && y0 + 2 * checker.getType().moveDir >= 0 && y0 + 2 * checker.getType().moveDir <= 7
+        if (tileExists(x0+1,y0 + 1 * checker.getType().moveDir)
+                && tileExists(x0+2,y0 + 2 * checker.getType().moveDir)
                 && board[x0 + 1][y0 + checker.getType().moveDir].hasChecker()
                 && board[x0 + 1][y0 + checker.getType().moveDir].getChecker().getType() != checker.getType()
                 && !board[x0 + 2][y0 + 2 * checker.getType().moveDir].hasChecker()) {
                 return true;
         }
 
-        if (x0 - 1 >= 0 && x0 - 1 <= 7 && y0 + 1 * checker.getType().moveDir >= 0 && y0 + 1 * checker.getType().moveDir <= 7
-                && x0 - 2 >= 0 && x0 - 2 <= 7 && y0 + 2 * checker.getType().moveDir >= 0 && y0 + 2 * checker.getType().moveDir <= 7
+        if (tileExists(x0-1,y0 + 1 * checker.getType().moveDir)
+                && tileExists(x0-2,y0 + 1 * checker.getType().moveDir)
                 && board[x0 - 1][y0 + checker.getType().moveDir].hasChecker()
                 && board[x0 - 1][y0 + checker.getType().moveDir].getChecker().getType() != checker.getType()
                 && !board[x0 - 2][y0 + 2 * checker.getType().moveDir].hasChecker()) {
