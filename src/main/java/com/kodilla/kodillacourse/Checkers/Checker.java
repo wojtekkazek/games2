@@ -60,5 +60,4 @@ public class Checker extends StackPane {
         relocate(oldX, oldY);
     }
 
-
 }

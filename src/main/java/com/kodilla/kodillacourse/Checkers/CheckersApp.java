@@ -9,6 +9,9 @@ import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import org.hibernate.validator.spi.scripting.ScriptEvaluatorNotFoundException;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class CheckersApp extends Application {
 
     public static final int tileSize = 50;
@@ -20,6 +23,7 @@ public class CheckersApp extends Application {
 
     private Group tilesGroup = new Group();
     private Group checkersGroup = new Group();
+    private List<Checker> checkersList = new ArrayList<>();
 
     private Parent createContent() {
         Pane root = new Pane();
@@ -46,6 +50,7 @@ public class CheckersApp extends Application {
                 if (checker != null) {
                     tile.setChecker(checker);
                     checkersGroup.getChildren().add(checker);
+                    checkersList.add(checker);
                 }
 
             }
@@ -67,7 +72,9 @@ public class CheckersApp extends Application {
         int y0 = toBoard(checker.getOldY());
 
         if (Math.abs(newX - x0) == 1 && newY - y0 == checker.getType().moveDir) {
-            return new MoveResult(MoveType.normal);
+            if (!anyCheckerOfTypeCanKill(checkersList, checker.getType())) {
+                return new MoveResult(MoveType.normal);
+            }
         } else if (Math.abs(newX - x0) == 2 && newY - y0 == checker.getType().moveDir * 2) {
 
             int x1 = x0 + (newX - x0) / 2;
@@ -188,6 +195,7 @@ public class CheckersApp extends Application {
                     Checker killedChecker = result.getChecker();
                     board[toBoard(killedChecker.getOldX())][toBoard(killedChecker.getOldY())].setChecker(null);
                     checkersGroup.getChildren().remove(killedChecker);
+                    checkersList.remove(killedChecker);
 
                     turnWhite = !turnWhite;
                     break;
@@ -231,6 +239,7 @@ public class CheckersApp extends Application {
                     Checker killedChecker = result.getChecker();
                     board[toBoard(killedChecker.getOldX())][toBoard(killedChecker.getOldY())].setChecker(null);
                     checkersGroup.getChildren().remove(killedChecker);
+                    checkersList.remove(killedChecker);
 
                     turnWhite = !turnWhite;
                     break;
@@ -238,6 +247,43 @@ public class CheckersApp extends Application {
             }
         });
         return queen;
+    }
+
+    public boolean checkerCanKill(Checker checker) {
+
+        int x0 = toBoard(checker.getOldX());
+        int y0 = toBoard(checker.getOldY());
+
+        if (x0 + 1 >= 0 && x0 + 1 <= 7 && y0 + 1 * checker.getType().moveDir >= 0 && y0 + 1 * checker.getType().moveDir <= 7
+                && x0 + 2 >= 0 && x0 + 2 <= 7 && y0 + 2 * checker.getType().moveDir >= 0 && y0 + 2 * checker.getType().moveDir <= 7
+                && board[x0 + 1][y0 + checker.getType().moveDir].hasChecker()
+                && board[x0 + 1][y0 + checker.getType().moveDir].getChecker().getType() != checker.getType()
+                && !board[x0 + 2][y0 + 2 * checker.getType().moveDir].hasChecker()) {
+                return true;
+        }
+
+        if (x0 - 1 >= 0 && x0 - 1 <= 7 && y0 + 1 * checker.getType().moveDir >= 0 && y0 + 1 * checker.getType().moveDir <= 7
+                && x0 - 2 >= 0 && x0 - 2 <= 7 && y0 + 2 * checker.getType().moveDir >= 0 && y0 + 2 * checker.getType().moveDir <= 7
+                && board[x0 - 1][y0 + checker.getType().moveDir].hasChecker()
+                && board[x0 - 1][y0 + checker.getType().moveDir].getChecker().getType() != checker.getType()
+                && !board[x0 - 2][y0 + 2 * checker.getType().moveDir].hasChecker()) {
+            return true;
+        }
+
+        return false;
+
+    }
+
+    public boolean anyCheckerOfTypeCanKill(List<Checker> checkers, CheckerType type) {
+        checkers.stream()
+                .filter(checker -> checker.getType() == type);
+
+        for (Checker eachChecker: checkers) {
+            if (checkerCanKill(eachChecker)) {
+                return true;
+            }
+        }
+        return false;
     }
 
 
