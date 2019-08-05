@@ -12,7 +12,7 @@ public class Tile extends Rectangle {
     private Queen queen;
 
     public boolean hasChecker() {
-        return checker != null && queen != null;
+        return checker != null || queen != null;
     }
 
     public Checker getChecker() {

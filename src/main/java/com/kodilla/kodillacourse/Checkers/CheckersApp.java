@@ -93,16 +93,45 @@ public class CheckersApp extends Application {
         int x0 = toBoard(queen.getOldX());
         int y0 = toBoard(queen.getOldY());
 
-        if (Math.abs(newX - x0) == 1) {
-            return new QueenMoveResult(MoveType.normal);
-        } else if (Math.abs(newX - x0) == 2) {
+        if (Math.abs(newX - x0) != 0 && Math.abs(newY - y0) == Math.abs(newX - x0)){
 
-            int x1 = x0 + (newX - x0) / 2;
-            int y1 = y0 + (newY -y0) / 2;
-
-            if (board[x1][y1].hasChecker() && QueenType.valueOf(board[x1][y1].getChecker().getType().name()) != queen.getType()) {
-                return new QueenMoveResult(MoveType.kill, board[x1][y1].getChecker());
+            boolean isCheckerOnAWay = false;
+            for (int i=1; i<Math.abs(newX - x0); i++) {
+                int x1 = x0 + i*(newX - x0) / Math.abs(newX - x0);
+                int y1 = y0 + i*(newY -y0) / Math.abs(newY -y0);
+                if (board[x1][y1].hasChecker()) {
+                    isCheckerOnAWay = true;
+                }
             }
+            if (!isCheckerOnAWay) {
+                return new QueenMoveResult(MoveType.normal);
+            } else {
+
+                boolean isCheckerOnlyOnSecondToLastTile = true;
+                for (int i = 1; i < Math.abs(newX - x0) - 1; i++) {
+                    int x1 = x0 + i * (newX - x0) / Math.abs(newX - x0);
+                    int y1 = y0 + i * (newY - y0) / Math.abs(newY - y0);
+                    if (board[x1][y1].hasChecker()) {
+                        isCheckerOnlyOnSecondToLastTile = false;
+                    }
+                }
+
+                int x2 = newX - (newX - x0) / Math.abs(newX - x0);
+                int y2 = newY - (newY - y0) / Math.abs(newY - y0);
+
+                boolean isCheckerOnSecondToLastTileDifferentType = false;
+                if (isCheckerOnlyOnSecondToLastTile) {
+                    if (QueenType.valueOf(board[x2][y2].getChecker().getType().name()) != queen.getType()) {
+                        isCheckerOnSecondToLastTileDifferentType = true;
+                    }
+                }
+
+                if (isCheckerOnSecondToLastTileDifferentType) {
+                    return new QueenMoveResult(MoveType.kill, board[x2][y2].getChecker());
+                }
+
+            }
+
         }
 
         return new QueenMoveResult((MoveType.none));
