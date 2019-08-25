@@ -10,6 +10,7 @@ import static com.kodilla.kodillacourse.Checkers.CheckersApp.tileSize;
 public class Checker extends StackPane {
 
     private CheckerType type;
+    private boolean isQueen;
     private double mouseX;
     private double mouseY;
     private double oldX;
@@ -17,6 +18,10 @@ public class Checker extends StackPane {
 
     public CheckerType getType() {
         return type;
+    }
+
+    public boolean getIfIsQueen() {
+        return isQueen;
     }
 
     public double getOldX() {
@@ -27,8 +32,9 @@ public class Checker extends StackPane {
         return oldY;
     }
 
-    public Checker(CheckerType type, int x, int y) {
+    public Checker(CheckerType type, boolean isQueen, int x, int y) {
         this.type = type;
+        this.isQueen = isQueen;
 
         move(x, y);
 
@@ -60,6 +66,15 @@ public class Checker extends StackPane {
 
     public void abortMove() {
         relocate(oldX, oldY);
+    }
+
+    public void transformToQueen() {
+        isQueen = true;
+        Circle crown = new Circle(tileSize *0.2);
+        crown.setFill(Color.BLACK);
+        crown.setTranslateX((tileSize - tileSize * 0.2 * 3)/2);
+        crown.setTranslateY((tileSize - tileSize * 0.2 * 3)/2);
+        getChildren().addAll(crown);
     }
 
 }

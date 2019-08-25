@@ -9,12 +9,11 @@ import static javafx.scene.paint.Color.WHITE;
 public class Tile extends Rectangle {
 
     private Checker checker;
-    private Queen queen;
     private int tileX;
     private int tileY;
 
     public boolean hasChecker() {
-        return checker != null || queen != null;
+        return checker != null;
     }
 
     public Checker getChecker() {
@@ -33,11 +32,10 @@ public class Tile extends Rectangle {
         this.checker = checker;
     }
 
-    public void setQueen(Queen queen) {
-        this.queen = queen;
-    }
-
     public Tile(int size, boolean white, int tileX, int tileY) {
+        this.tileX = tileX;
+        this.tileY = tileY;
+
         setWidth(size);
         setHeight(size);
 
@@ -55,4 +53,12 @@ public class Tile extends Rectangle {
 
     }
 
+    @Override
+    public String toString() {
+        return "Tile{" +
+                "checker=" + checker +
+                ", tileX=" + tileX +
+                ", tileY=" + tileY +
+                '}';
+    }
 }
