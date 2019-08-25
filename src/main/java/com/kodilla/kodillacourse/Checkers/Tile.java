@@ -10,6 +10,8 @@ public class Tile extends Rectangle {
 
     private Checker checker;
     private Queen queen;
+    private int tileX;
+    private int tileY;
 
     public boolean hasChecker() {
         return checker != null || queen != null;
@@ -17,6 +19,14 @@ public class Tile extends Rectangle {
 
     public Checker getChecker() {
         return checker;
+    }
+
+    public int getTileX() {
+        return tileX;
+    }
+
+    public int getTileY() {
+        return tileY;
     }
 
     public void setChecker(Checker checker) {
@@ -27,11 +37,11 @@ public class Tile extends Rectangle {
         this.queen = queen;
     }
 
-    public Tile(int size, boolean white, int x, int y) {
+    public Tile(int size, boolean white, int tileX, int tileY) {
         setWidth(size);
         setHeight(size);
 
-        relocate(x * size, y * size);
+        relocate(tileX * size, tileY * size);
 
         Color color;
 

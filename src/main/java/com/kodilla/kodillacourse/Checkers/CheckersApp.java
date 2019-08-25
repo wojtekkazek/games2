@@ -11,6 +11,7 @@ import org.hibernate.validator.spi.scripting.ScriptEvaluatorNotFoundException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class CheckersApp extends Application {
 
@@ -24,6 +25,7 @@ public class CheckersApp extends Application {
     private Group tilesGroup = new Group();
     private Group checkersGroup = new Group();
     private List<Checker> checkersList = new ArrayList<>();
+    private List<Queen> queensList = new ArrayList<>();
 
     private Parent createContent() {
         Pane root = new Pane();
@@ -71,11 +73,17 @@ public class CheckersApp extends Application {
         int x0 = toBoard(checker.getOldX());
         int y0 = toBoard(checker.getOldY());
 
+        QueenType queenType = QueenType.valueOf(checker.getType().name());
+
         if (Math.abs(newX - x0) == 1 && newY - y0 == checker.getType().moveDir) {
             if (!anyCheckerOfTypeCanKill(checkersList, checker.getType())) {
-                return new MoveResult(MoveType.normal);
+                if (!anyQueenOfTypeCanKill(queensList, queenType)) {
+                    return new MoveResult(MoveType.normal);
+                }
             }
-        } else if (Math.abs(newX - x0) == 2 && newY - y0 == checker.getType().moveDir * 2) {
+        }
+
+        if (Math.abs(newX - x0) == 2 && newY - y0 == checker.getType().moveDir * 2) {
 
             int x1 = x0 + (newX - x0) / 2;
             int y1 = y0 + (newY -y0) / 2;
@@ -110,8 +118,15 @@ public class CheckersApp extends Application {
                     isCheckerOnAWay = true;
                 }
             }
+
+            CheckerType checkerType = CheckerType.valueOf(queen.getType().name());
+
             if (!isCheckerOnAWay) {
-                return new QueenMoveResult(MoveType.normal);
+                if (!anyQueenOfTypeCanKill(queensList, queen.getType())) {
+                    if (!anyCheckerOfTypeCanKill(checkersList, checkerType)) {
+                        return new QueenMoveResult(MoveType.normal);
+                    }
+                }
             } else {
 
                 boolean isCheckerOnlyOnSecondToLastTile = true;
@@ -172,8 +187,10 @@ public class CheckersApp extends Application {
                     board[x0][y0].setChecker(null);
                     if (newY == 7 || newY == 0) {
                         checkersGroup.getChildren().remove(checker);
+                        checkersList.remove(checker);
                         Queen queen = makeQueen(queenType, newX , newY);
                         checkersGroup.getChildren().add(queen);
+                        queensList.add(queen);
                     } else {
                         board[newX][newY].setChecker(checker);
                     }
@@ -186,8 +203,10 @@ public class CheckersApp extends Application {
                     board[x0][y0].setChecker(null);
                     if (newY == 7 || newY == 0) {
                         checkersGroup.getChildren().remove(checker);
+                        checkersList.remove(checker);
                         Queen queen = makeQueen(queenType, newX , newY);
                         checkersGroup.getChildren().add(queen);
+                        queensList.add(queen);
                     } else {
                         board[newX][newY].setChecker(checker);
                     }
@@ -250,7 +269,7 @@ public class CheckersApp extends Application {
     }
 
     public boolean tileExists(int x, int y) {
-        return (x >=0 && x <= 7 & y >=0 & y <= 7);
+        return (x >=0 && x <= 7 && y >=0 && y <= 7);
     }
 
     public boolean checkerCanKill(Checker checker) {
@@ -279,13 +298,95 @@ public class CheckersApp extends Application {
     }
 
     public boolean anyCheckerOfTypeCanKill(List<Checker> checkers, CheckerType type) {
-        checkers.stream()
-                .filter(checker -> checker.getType() == type);
+        List<Checker> checkersWhichCanKill = checkers.stream()
+                .filter(checker -> checker.getType() == type)
+                .filter(checker -> checkerCanKill(checker) == true)
+                .collect(Collectors.toList());
 
-        for (Checker eachChecker: checkers) {
-            if (checkerCanKill(eachChecker)) {
-                return true;
+        if (checkersWhichCanKill.size() != 0) {
+            return true;
+        }
+        return false;
+    }
+
+    public List<Tile> whereQueenCanPotentiallyMove (Queen queen) {
+
+        List<Tile> potentialTiles = new ArrayList<>();
+
+        int x0 = toBoard(queen.getOldX());
+        int y0 = toBoard(queen.getOldY());
+
+        for (int i=-7; i<8; i++) {
+            if (i !=0) {
+                if (tileExists(x0 + i, y0 + i)) {
+                    potentialTiles.add(new Tile(tileSize, false, x0 + i, y0 + i));
+                }
+                if (tileExists(x0 - i, y0 + i)) {
+                    potentialTiles.add(new Tile(tileSize, false, x0 + i, y0 + i));
+                }
             }
+        }
+
+        return potentialTiles;
+    }
+
+    public boolean queenCanKill(Queen queen) {
+
+        List<Tile> potentialTiles = whereQueenCanPotentiallyMove(queen);
+
+        int x0 = toBoard(queen.getOldX());
+        int y0 = toBoard(queen.getOldY());
+
+        for (Tile potentialTile: potentialTiles) {
+            int newX = potentialTile.getTileX();
+            int newY = potentialTile.getTileY();
+
+            boolean isCheckerOnAWay = false;
+            for (int i=1; i<Math.abs(newX - x0); i++) {
+                int x1 = x0 + i*(newX - x0) / Math.abs(newX - x0);
+                int y1 = y0 + i*(newY -y0) / Math.abs(newY -y0);
+                if (board[x1][y1].hasChecker()) {
+                    isCheckerOnAWay = true;
+                }
+            }
+
+            if (isCheckerOnAWay) {
+
+                boolean isCheckerOnlyOnSecondToLastTile = true;
+                for (int i = 1; i < Math.abs(newX - x0) - 1; i++) {
+                    int x1 = x0 + i * (newX - x0) / Math.abs(newX - x0);
+                    int y1 = y0 + i * (newY - y0) / Math.abs(newY - y0);
+                    if (board[x1][y1].hasChecker()) {
+                        isCheckerOnlyOnSecondToLastTile = false;
+                    }
+                }
+
+                int x2 = newX - (newX - x0) / Math.abs(newX - x0);
+                int y2 = newY - (newY - y0) / Math.abs(newY - y0);
+
+                boolean isCheckerOnSecondToLastTileDifferentType = false;
+                if (isCheckerOnlyOnSecondToLastTile) {
+                    if (QueenType.valueOf(board[x2][y2].getChecker().getType().name()) != queen.getType()) {
+                        isCheckerOnSecondToLastTileDifferentType = true;
+                    }
+                }
+
+                if (isCheckerOnSecondToLastTileDifferentType) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public boolean anyQueenOfTypeCanKill(List<Queen> queens, QueenType type) {
+        List<Queen> queensWhichCanKill = queens.stream()
+                .filter(queen -> queen.getType() == type)
+                .filter(queen -> queenCanKill(queen) == true)
+                .collect(Collectors.toList());
+
+        if (queensWhichCanKill.size() != 0) {
+            return true;
         }
         return false;
     }
