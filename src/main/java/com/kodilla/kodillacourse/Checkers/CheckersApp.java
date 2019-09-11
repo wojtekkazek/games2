@@ -1,12 +1,22 @@
 package com.kodilla.kodillacourse.Checkers;
 
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Application;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.scene.Cursor;
 import javafx.scene.Group;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import org.hibernate.validator.spi.scripting.ScriptEvaluatorNotFoundException;
 
 import java.util.ArrayList;
@@ -14,6 +24,35 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class CheckersApp extends Application {
+
+    private Pane content;
+    private Button startButton;
+    private Text stopwatch;
+    private int mins;
+    private int secs;
+    private boolean gameOn;
+    private Timeline timeline;
+    private Text turn;
+    private Text checkersNoWhite;
+    private Text noOfWhiteCheckers;
+    private Text checkersNoRed;
+    private Text noOfRedCheckers;
+    private Text gamePaused;
+    private Button giveUpButton;
+    private Text gameOver;
+    private int whiteWonNo;
+    private Text whiteWon = new Text("");
+    private int redWonNo;
+    private Text redWon = new Text("");
+    //private int lastGameMins;
+    //private int lastGameSecs;
+    private Text gameDuration = new Text("");
+    //private int totalMins;
+    //private int totalSecs;
+    private Text averageDuration = new Text("");
+    private VBox vbox;
+    private HBox bigHBox;
+    private Scene scene;
 
     public static final int tileSize = 50;
     public static final int width = 8;
@@ -31,7 +70,12 @@ public class CheckersApp extends Application {
         Pane root = new Pane();
         root.setPrefSize(width * tileSize, height * tileSize);
         root.getChildren().addAll(tilesGroup, checkersGroup);
+        setTilesAndCheckers();
 
+        return root;
+    }
+
+    public void setTilesAndCheckers() {
         for (int y = 0; y < height; y++) {
             for (int x=0; x < width; x++) {
                 Tile tile = new Tile(tileSize, (x+y)%2 == 0, x, y);
@@ -57,11 +101,15 @@ public class CheckersApp extends Application {
 
             }
         }
-
-        return root;
     }
 
+
     private MoveResult tryMove(Checker checker, int newX, int newY) {
+
+        if (!gameOn) {
+            gamePaused.setText("GAME PAUSED!");
+            return new MoveResult(MoveType.none);
+        }
 
         if (board[newX][newY].hasChecker() || (newX + newY) %2 == 0) {
             return new MoveResult(MoveType.none);
@@ -181,9 +229,9 @@ public class CheckersApp extends Application {
                         checker.transformToQueen();
                         checkersList.remove(checker);
                         queensList.add(checker);
-                        System.out.print(queensList);
                     }
                     turnWhite = !turnWhite;
+                    updateStatistics();
                     break;
 
                 case kill:
@@ -195,18 +243,24 @@ public class CheckersApp extends Application {
                         checker.transformToQueen();
                         checkersList.remove(checker);
                         queensList.add(checker);
-                        System.out.print(queensList);
                     }
 
                     Checker killedChecker = result.getChecker();
                     board[toBoard(killedChecker.getOldX())][toBoard(killedChecker.getOldY())].setChecker(null);
                     checkersGroup.getChildren().remove(killedChecker);
-                    checkersList.remove(killedChecker);
-
-                    if(!anyCheckerOfTypeCanKill(checkersList, checker.getType()) & !anyQueenOfTypeCanKill(queensList, checker.getType())) {
-                        turnWhite = !turnWhite;
+                    if (killedChecker.getIfIsQueen()) {
+                        queensList.remove(killedChecker);
+                        if(!queenCanKill(checker)) {
+                            turnWhite = !turnWhite;
+                        }
+                    } else {
+                        checkersList.remove(killedChecker);
+                        if(!checkerCanKill(checker)) {
+                            turnWhite = !turnWhite;
+                        }
                     }
 
+                    updateStatistics();
                     break;
             }
         });
@@ -232,11 +286,11 @@ public class CheckersApp extends Application {
         }
 
         if (tileExists(x0-1,y0 + 1 * checker.getType().moveDir)
-                && tileExists(x0-2,y0 + 1 * checker.getType().moveDir)
+                && tileExists(x0-2,y0 + 2 * checker.getType().moveDir)
                 && board[x0 - 1][y0 + checker.getType().moveDir].hasChecker()
                 && board[x0 - 1][y0 + checker.getType().moveDir].getChecker().getType() != checker.getType()
                 && !board[x0 - 2][y0 + 2 * checker.getType().moveDir].hasChecker()) {
-            return true;
+                return true;
         }
 
         return false;
@@ -248,7 +302,6 @@ public class CheckersApp extends Application {
                 .filter(checker -> checker.getType() == type)
                 .filter(checker -> checkerCanKill(checker) == true)
                 .collect(Collectors.toList());
-
         if (checkersWhichCanKill.size() != 0) {
             return true;
         }
@@ -272,8 +325,6 @@ public class CheckersApp extends Application {
                 }
             }
         }
-
-        System.out.println(potentialTiles);
         return potentialTiles;
     }
 
@@ -337,11 +388,133 @@ public class CheckersApp extends Application {
         return false;
     }
 
+    public void updateStatistics() {
+        if (turnWhite) {
+            turn.setText("Turn: WHITE");
+        } else {
+            turn.setText("Turn: RED");
+        }
+
+        List<Checker> whiteCheckers = checkersList.stream()
+                .filter(checker -> checker.getType() == CheckerType.WHITE)
+                .collect(Collectors.toList());
+        //noOfWhiteCheckers.setText(String.valueOf(whiteCheckers.size()));
+        //noOfRedCheckers.setText(String.valueOf(checkersList.size()-whiteCheckers.size()));
+        List<Checker> whiteQueens = queensList.stream()
+                .filter(queen -> queen.getType() == CheckerType.WHITE)
+                .collect(Collectors.toList());
+        noOfWhiteCheckers.setText(whiteCheckers.size() + " / " + whiteQueens.size());
+        noOfRedCheckers.setText((checkersList.size()- whiteCheckers.size()) + " / " + (queensList.size()- whiteQueens.size()));
+
+        if (whiteCheckers.isEmpty() && whiteQueens.isEmpty()) {
+            turnWhite = true;
+            giveUpButton.fire();
+        }
+        if ((checkersList.size()- whiteCheckers.size() == 0) && (queensList.size()- whiteQueens.size() == 0)) {
+            turnWhite = false;
+            giveUpButton.fire();
+        }
+
+    }
+
+    void runStopwatch (Text text) {
+        if(secs == 60) {
+            mins++;
+            secs = 0;
+        }
+        stopwatch.setText((((mins/10) == 0) ? "0" : "") + mins + ":"
+                + (((secs/10) == 0) ? "0" : "") + secs++);
+    }
 
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        Scene scene = new Scene(createContent());
+
+        content = new Pane(createContent());
+
+        startButton = new Button("START");
+        mins = 0;
+        secs = 0;
+        gameOn = false;
+        stopwatch = new Text("00:00");
+        timeline = new Timeline(new KeyFrame(Duration.millis(1000), new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                runStopwatch(stopwatch);
+            }
+        }));
+        timeline.setCycleCount(Timeline.INDEFINITE);
+        startButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                gameOver.setText("");
+                if(gameOn) {
+                    timeline.pause();
+                    gameOn = false;
+                    startButton.setText("CONTINUE");
+                } else {
+                    timeline.play();
+                    gameOn = true;
+                    startButton.setText("PAUSE");
+                    gamePaused.setText("");
+                }
+            }
+        });
+
+        giveUpButton = new Button("Give up");
+        giveUpButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                if(startButton.getText() != "START") {
+                    timeline.pause();
+                    String whoWon;
+                    if(turnWhite) {
+                        whoWon = "RED";
+                        redWonNo = redWonNo + 1;
+                        redWon.setText("Red won: " + redWonNo + " games");
+                    } else {
+                        whoWon = "WHITE";
+                        whiteWonNo = whiteWonNo + 1;
+                        whiteWon.setText("White won: " + whiteWonNo + " games");
+                    }
+                    gameOver.setText("GAME OVER! " + whoWon +  " WON!");
+
+                    gameDuration.setText("Game duration: " + ((((mins/10) == 0) ? "0" : "") + mins + ":"
+                            + (((secs/10) == 0) ? "0" : "") + secs++));
+                    /*lastGameMins = mins;
+                    lastGameSecs = secs;
+                    totalSecs = totalSecs + secs;
+                    totalMins = totalMins + mins;
+                    averageDuration.setText("Average game duration: " + ((((totalMins/10) == 0) ? "0" : "") + totalMins + ":"
+                            + (((totalSecs/10) == 0) ? "0" : "") + totalSecs++));*/
+
+                    gameOn = false;
+                    turnWhite = true;
+                    mins = 0;
+                    secs = 0;
+                    stopwatch.setText("00:00");
+                    startButton.setText("START");
+                    tilesGroup.getChildren().clear();
+                    checkersGroup.getChildren().clear();
+                    checkersList.clear();
+                    queensList.clear();
+                    setTilesAndCheckers();
+                    updateStatistics();
+                }
+            }
+        });
+
+        turn = new Text("Turn: WHITE");
+        checkersNoWhite = new Text("White checkers / queens remaining:");
+        noOfWhiteCheckers = new Text("12 / 0 ");
+        checkersNoRed = new Text("Red checkers / queens remaining:");
+        noOfRedCheckers = new Text("12 / 0 ");
+        gamePaused = new Text();
+        gameOver = new Text();
+        gameOver.setFill(Color.RED);
+        vbox = new VBox(10, startButton, stopwatch, turn, checkersNoWhite,noOfWhiteCheckers,checkersNoRed,noOfRedCheckers, gamePaused, giveUpButton, gameOver, gameDuration, whiteWon, redWon, averageDuration);
+        bigHBox = new HBox(10, content, vbox);
+        scene = new Scene(bigHBox);
         scene.setCursor(Cursor.HAND);
         primaryStage.setTitle("Checkers");
         primaryStage.setScene(scene);
