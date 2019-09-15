@@ -3,14 +3,14 @@ package com.kodilla.kodillacourse.Checkers;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
-import static javafx.scene.paint.Color.GREEN;
-import static javafx.scene.paint.Color.WHITE;
+import static javafx.scene.paint.Color.*;
 
 public class Tile extends Rectangle {
 
     private Checker checker;
     private int tileX;
     private int tileY;
+    private int size;
 
     public boolean hasChecker() {
         return checker != null;
@@ -35,6 +35,7 @@ public class Tile extends Rectangle {
     public Tile(int size, boolean white, int tileX, int tileY) {
         this.tileX = tileX;
         this.tileY = tileY;
+        this.size = size;
 
         setWidth(size);
         setHeight(size);

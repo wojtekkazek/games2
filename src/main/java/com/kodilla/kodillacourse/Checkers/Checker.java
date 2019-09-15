@@ -77,4 +77,11 @@ public class Checker extends StackPane {
         getChildren().addAll(crown);
     }
 
+    @Override
+    public String toString() {
+        return "Checker{" +
+                "oldX=" + oldX +
+                ", oldY=" + oldY +
+                '}';
+    }
 }
