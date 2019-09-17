@@ -65,6 +65,9 @@ public class CheckersApp extends Application {
 
     private Group tilesGroup = new Group();
     private Group checkersGroup = new Group();
+    private Group killsToHighlightGroup = new Group();
+    private Group movesToHighlightGroup = new Group();
+
     private List<Checker> checkersList = new ArrayList<>();
     private List<Checker> queensList = new ArrayList<>();
     private List<Move> possibleKillsOfQueenOrToMakeQueen = new ArrayList<>();
@@ -76,7 +79,7 @@ public class CheckersApp extends Application {
     private Parent createContent() {
         Pane root = new Pane();
         root.setPrefSize(width * tileSize, height * tileSize);
-        root.getChildren().addAll(tilesGroup, checkersGroup);
+        root.getChildren().addAll(tilesGroup, checkersGroup, movesToHighlightGroup, killsToHighlightGroup);
         setTilesAndCheckers();
         return root;
     }
@@ -287,6 +290,9 @@ public class CheckersApp extends Application {
         if (tileExists(x0+1,y0 + checker.getType().moveDir)
                 && !board[x0 + 1][y0 + checker.getType().moveDir].hasChecker()) {
             possibleMoves.add(new Move(checker, x0+1, y0 + checker.getType().moveDir));
+            Highlighting highlighting = new Highlighting(x0+1, y0 + checker.getType().moveDir);
+            board[x0+1][y0 + checker.getType().moveDir].setHighlighting(highlighting);
+            movesToHighlightGroup.getChildren().add(highlighting);
             possibleMovesOfChecker++;
             if (y0 + checker.getType().moveDir == 4 + 4 * checker.getType().moveDir) {
                 possibleMovesToMakeQueen.add(new Move(checker, x0+1, y0 + checker.getType().moveDir));
@@ -296,6 +302,9 @@ public class CheckersApp extends Application {
         if (tileExists(x0-1,y0 + checker.getType().moveDir)
                 && !board[x0-1][y0 + checker.getType().moveDir].hasChecker()) {
             possibleMoves.add(new Move(checker, x0-1, y0 + checker.getType().moveDir));
+            Highlighting highlighting = new Highlighting(x0-1, y0 + checker.getType().moveDir);
+            board[x0-1][y0 + checker.getType().moveDir].setHighlighting(highlighting);
+            movesToHighlightGroup.getChildren().add(highlighting);
             possibleMovesOfChecker++;
             if (y0 + checker.getType().moveDir == 4 + 4 * checker.getType().moveDir) {
                 possibleMovesToMakeQueen.add(new Move(checker, x0+1, y0 + checker.getType().moveDir));
@@ -381,6 +390,9 @@ public class CheckersApp extends Application {
                 && board[x0 + 1][y0 + checker.getType().moveDir].getChecker().getType() != checker.getType()
                 && !board[x0 + 2][y0 + 2 * checker.getType().moveDir].hasChecker()) {
             possibleKills.add(new Move(checker, x0+2, y0 + 2 * checker.getType().moveDir));
+            Highlighting highlighting = new Highlighting(x0+2, y0 + 2 * checker.getType().moveDir);
+            board[x0+2][y0 + 2*checker.getType().moveDir].setHighlighting(highlighting);
+            killsToHighlightGroup.getChildren().add(highlighting);
             possibleKillsOfChecker++;
             if (y0 + 2 * checker.getType().moveDir == 4 + 4 * checker.getType().moveDir) {
                 possibleKillsOfQueenOrToMakeQueen.add(new Move(checker, x0+2, y0 + 2 * checker.getType().moveDir));
@@ -395,6 +407,9 @@ public class CheckersApp extends Application {
                 && board[x0 - 1][y0 + checker.getType().moveDir].getChecker().getType() != checker.getType()
                 && !board[x0 - 2][y0 + 2 * checker.getType().moveDir].hasChecker()) {
             possibleKills.add(new Move(checker, x0-2, y0 + 2 * checker.getType().moveDir));
+            Highlighting highlighting = new Highlighting(x0-2, y0 + 2 * checker.getType().moveDir);
+            board[x0-2][y0 + 2*checker.getType().moveDir].setHighlighting(highlighting);
+            killsToHighlightGroup.getChildren().add(highlighting);
             possibleKillsOfChecker++;
             if (y0 + 2 * checker.getType().moveDir == 4 + 4 * checker.getType().moveDir) {
                 possibleKillsOfQueenOrToMakeQueen.add(new Move(checker, x0-2, y0 + 2 * checker.getType().moveDir));
@@ -486,6 +501,9 @@ public class CheckersApp extends Application {
 
                     if (isCheckerOnSecondToLastTileDifferentType) {
                         possibleKills.add(new Move(queen, newX, newY));
+                        Highlighting highlighting = new Highlighting(newX, newY);
+                        board[newX][newY].setHighlighting(highlighting);
+                        killsToHighlightGroup.getChildren().add(highlighting);
                         possibleKillsOfQueen++;
                         if (board[x2][y2].getChecker().getIfIsQueen()) {
                             possibleKillsOfQueenOrToMakeQueen.add(new Move(queen, newX, newY));
@@ -493,6 +511,9 @@ public class CheckersApp extends Application {
                     }
                 } else {
                     possibleMoves.add(new Move(queen, newX, newY));
+                    Highlighting highlighting = new Highlighting(newX, newY);
+                    board[newX][newY].setHighlighting(highlighting);
+                    movesToHighlightGroup.getChildren().add(highlighting);
                 }
             }
         }
@@ -515,6 +536,8 @@ public class CheckersApp extends Application {
     }
 
     public void MoveAsComputer(List<Checker> checkers, List<Checker> queens) {
+        movesToHighlightGroup.getChildren().clear();
+        killsToHighlightGroup.getChildren().clear();
         anyCheckerOfTypeCanKill(checkers, CheckerType.RED);
         anyQueenOfTypeCanKill(queens, CheckerType.RED);
         anyCheckerOfTypeCanMoveSafely(checkers, CheckerType.RED);
@@ -594,23 +617,37 @@ public class CheckersApp extends Application {
         }
     }
 
-    public void updateStatistics() {
-        if (turnWhite) {
-            turn.setText("Turn: WHITE");
-        } else {
-            turn.setText("Turn: RED");
+    public void updateHighlightening (CheckerType type) {
+        movesToHighlightGroup.getChildren().clear();
+        killsToHighlightGroup.getChildren().clear();
+
+        anyCheckerOfTypeCanKill(checkersList, type);
+        anyQueenOfTypeCanKill(queensList, type);
+        anyCheckerOfTypeCanMoveSafely(checkersList, type);
+        anyCheckerOfTypeCanMove(checkersList, type);
+        if (anyCheckerOfTypeCanKill(checkersList, type) || anyQueenOfTypeCanKill(queensList, type)) {
+            movesToHighlightGroup.getChildren().clear();
         }
+    }
+
+    public void updateStatistics() {
 
         List<Checker> whiteCheckers = checkersList.stream()
                 .filter(checker -> checker.getType() == CheckerType.WHITE)
                 .collect(Collectors.toList());
-        //noOfWhiteCheckers.setText(String.valueOf(whiteCheckers.size()));
-        //noOfRedCheckers.setText(String.valueOf(checkersList.size()-whiteCheckers.size()));
         List<Checker> whiteQueens = queensList.stream()
                 .filter(queen -> queen.getType() == CheckerType.WHITE)
                 .collect(Collectors.toList());
         noOfWhiteCheckers.setText(whiteCheckers.size() + " / " + whiteQueens.size());
         noOfRedCheckers.setText((checkersList.size()- whiteCheckers.size()) + " / " + (queensList.size()- whiteQueens.size()));
+
+        if (turnWhite) {
+            turn.setText("Turn: WHITE");
+            updateHighlightening(CheckerType.WHITE);
+        } else {
+            turn.setText("Turn: RED");
+            updateHighlightening(CheckerType.RED);
+        }
 
         if (whiteCheckers.isEmpty() && whiteQueens.isEmpty()) {
             turnWhite = true;
@@ -669,6 +706,7 @@ public class CheckersApp extends Application {
                     gameOn = true;
                     startButton.setText("PAUSE");
                     gamePaused.setText("");
+                    updateHighlightening(CheckerType.WHITE);
                 }
             }
         });

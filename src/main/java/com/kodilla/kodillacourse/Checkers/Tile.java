@@ -8,6 +8,7 @@ import static javafx.scene.paint.Color.*;
 public class Tile extends Rectangle {
 
     private Checker checker;
+    private Highlighting highlighting;
     private int tileX;
     private int tileY;
     private int size;
@@ -30,6 +31,10 @@ public class Tile extends Rectangle {
 
     public void setChecker(Checker checker) {
         this.checker = checker;
+    }
+
+    public void setHighlighting(Highlighting highlighting) {
+        this.highlighting = highlighting;
     }
 
     public Tile(int size, boolean white, int tileX, int tileY) {
