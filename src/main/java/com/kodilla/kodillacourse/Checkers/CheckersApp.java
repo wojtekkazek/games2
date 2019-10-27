@@ -60,6 +60,8 @@ public class CheckersApp extends Application {
     public static final int height = 8;
     private boolean turnWhite = true;
     private DifficultyLevel difficultyLevel = DifficultyLevel.VERYEASY;
+    private boolean someCheckerAlreadyKilledInThisTurn;
+    private Checker checkerWhichAlreadyKilledInThisTurn;
 
     private Tile[][] board = new Tile [width][height];
 
@@ -136,7 +138,7 @@ public class CheckersApp extends Application {
             if (Math.abs(newX - x0) == 1 && newY - y0 == checker.getType().moveDir) {
                 if (!anyCheckerOfTypeCanKill(checkersList, checker.getType())) {
                     if (!anyQueenOfTypeCanKill(queensList, checker.getType())) {
-                        return new MoveResult(MoveType.NORMAL);
+                            return new MoveResult(MoveType.NORMAL);
                     }
                 }
             }
@@ -147,7 +149,15 @@ public class CheckersApp extends Application {
                 int y1 = y0 + (newY -y0) / 2;
 
                 if (board[x1][y1].hasChecker() && board[x1][y1].getChecker().getType() != checker.getType()) {
-                    return new MoveResult(MoveType.KILL, board[x1][y1].getChecker());
+                    if(someCheckerAlreadyKilledInThisTurn) {
+                        if(checker.equals(checkerWhichAlreadyKilledInThisTurn)) {
+                            return new MoveResult(MoveType.KILL, board[x1][y1].getChecker());
+                        }
+                    } else {
+                        return new MoveResult(MoveType.KILL, board[x1][y1].getChecker());
+                    }
+                    someCheckerAlreadyKilledInThisTurn = false;
+                    checkerWhichAlreadyKilledInThisTurn = null;
                 }
             }
 
@@ -196,8 +206,16 @@ public class CheckersApp extends Application {
                     }
 
                     if (isCheckerOnSecondToLastTileDifferentType) {
-                        return new MoveResult(MoveType.KILL, board[x2][y2].getChecker());
+                        if(someCheckerAlreadyKilledInThisTurn) {
+                            if(checker.equals(checkerWhichAlreadyKilledInThisTurn)) {
+                                return new MoveResult(MoveType.KILL, board[x2][y2].getChecker());
+                            }
+                        } else {
+                            return new MoveResult(MoveType.KILL, board[x2][y2].getChecker());
+                        }
                     }
+                    someCheckerAlreadyKilledInThisTurn = false;
+                    checkerWhichAlreadyKilledInThisTurn = null;
 
                 }
 
@@ -261,11 +279,17 @@ public class CheckersApp extends Application {
                         queensList.remove(killedChecker);
                         if(!queenCanKill(checker)) {
                             turnWhite = !turnWhite;
+                        } else {
+                            someCheckerAlreadyKilledInThisTurn = true;
+                            checkerWhichAlreadyKilledInThisTurn = checker;
                         }
                     } else {
                         checkersList.remove(killedChecker);
                         if(!checkerCanKill(checker)) {
                             turnWhite = !turnWhite;
+                        } else {
+                            someCheckerAlreadyKilledInThisTurn = true;
+                            checkerWhichAlreadyKilledInThisTurn = checker;
                         }
                     }
 
@@ -602,11 +626,17 @@ public class CheckersApp extends Application {
                         queensList.remove(killedChecker);
                         if(!queenCanKill(checker)) {
                             turnWhite = !turnWhite;
+                        } else {
+                            someCheckerAlreadyKilledInThisTurn = true;
+                            checkerWhichAlreadyKilledInThisTurn = checker;
                         }
                     } else {
                         checkersList.remove(killedChecker);
                         if(!checkerCanKill(checker)) {
                             turnWhite = !turnWhite;
+                        } else {
+                            someCheckerAlreadyKilledInThisTurn = true;
+                            checkerWhichAlreadyKilledInThisTurn = checker;
                         }
                     }
 

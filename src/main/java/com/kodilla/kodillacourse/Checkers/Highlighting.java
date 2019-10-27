@@ -26,7 +26,7 @@ public class Highlighting extends StackPane {
         rectangle2.setFill(Color.ORANGE);
         rectangle2.setTranslateX(0);
         rectangle2.setTranslateY(tileSize*0.8);
-ad
+
         /*Rectangle rectangle3 = new Rectangle(tileSize*0.2, tileSize*0.6);
         rectangle3.setFill(Color.ORANGE);
         rectangle3.setTranslateX(0);
