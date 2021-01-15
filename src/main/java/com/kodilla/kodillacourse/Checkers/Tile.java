@@ -2,23 +2,60 @@ package com.kodilla.kodillacourse.Checkers;
 
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import org.springframework.lang.Nullable;
 
-import static javafx.scene.paint.Color.*;
+import static javafx.scene.paint.Color.GREEN;
+import static javafx.scene.paint.Color.WHITE;
 
 public class Tile extends Rectangle {
 
-    private Checker checker;
-    private Highlighting highlighting;
+    private int size;
+    private Color color;
     private int tileX;
     private int tileY;
-    private int size;
+    private Checker checker;
+
+    public Tile(int size, boolean white, int tileX, int tileY) {
+        this.size = size;
+        this.tileX = tileX;
+        this.tileY = tileY;
+
+        setWidth(size);
+        setHeight(size);
+
+        relocate(tileX * size, tileY * size);
+
+        if(white == true) {
+            color = WHITE;
+        } else {
+            color = GREEN;
+        }
+
+        setFill(color);
+    }
 
     public boolean hasChecker() {
         return checker != null;
     }
 
     public Checker getChecker() {
-        return checker;
+        if (hasChecker()) {
+            return checker;
+        } else {
+            return null;
+        }
+    }
+
+    public void deleteChecker() {
+        checker = null;
+    }
+
+    public void setChecker(Checker checker) {
+        this.checker = checker;
+    }
+
+    public Color getColor() {
+        return color;
     }
 
     public int getTileX() {
@@ -29,42 +66,12 @@ public class Tile extends Rectangle {
         return tileY;
     }
 
-    public void setChecker(Checker checker) {
-        this.checker = checker;
-    }
-
-    public void setHighlighting(Highlighting highlighting) {
-        this.highlighting = highlighting;
-    }
-
-    public Tile(int size, boolean white, int tileX, int tileY) {
-        this.tileX = tileX;
-        this.tileY = tileY;
-        this.size = size;
-
-        setWidth(size);
-        setHeight(size);
-
-        relocate(tileX * size, tileY * size);
-
-        Color color;
-
-        if(white == true) {
-            color = WHITE;
-        } else {
-            color = GREEN;
-        }
-
-        setFill(color);
-
-    }
-
     @Override
     public String toString() {
         return "Tile{" +
-                "checker=" + checker +
-                ", tileX=" + tileX +
+                "tileX=" + tileX +
                 ", tileY=" + tileY +
+                ", checker=" + checker +
                 '}';
     }
 }

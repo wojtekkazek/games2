@@ -17,4 +17,8 @@ public enum CheckerType {
     public Color getCheckerColor() {
         return checkerColor;
     }
+
+    public int getMoveDir() {
+        return moveDir;
+    }
 }

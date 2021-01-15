@@ -1,35 +1,48 @@
 package com.kodilla.kodillacourse.Checkers;
 
+import java.util.Objects;
+
 public class Move {
 
+    private MoveType moveType;
     private Checker checker;
-    private int newX;
-    private int newY;
+    private Tile newTile;
 
-    public Move(Checker checker, int newX, int newY) {
+    public Move(MoveType moveType, Checker checker, Tile newTile) {
+        this.moveType = moveType;
         this.checker = checker;
-        this.newX = newX;
-        this.newY = newY;
+        this.newTile = newTile;
     }
 
     public Checker getChecker() {
         return checker;
     }
 
-    public int getNewX() {
-        return newX;
-    }
-
-    public int getNewY() {
-        return newY;
+    public Tile getNewTile() {
+        return newTile;
     }
 
     @Override
     public String toString() {
         return "Move{" +
-                "checker=" + checker +
-                ", newX=" + newX +
-                ", newY=" + newY +
+                "moveType=" + moveType +
+                ", checker=" + checker +
+                ", newTile=" + newTile +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Move move = (Move) o;
+        return moveType == move.moveType &&
+                Objects.equals(checker, move.checker) &&
+                Objects.equals(newTile, move.newTile);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(moveType, checker, newTile);
     }
 }
