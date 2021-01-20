@@ -4,8 +4,7 @@ import javafx.scene.paint.Color;
 
 import static com.kodilla.kodillacourse.Checkers.Board.*;
 import static com.kodilla.kodillacourse.Checkers.BoardAnalyzer.*;
-import static com.kodilla.kodillacourse.Checkers.GameStatus.isBetweenKills;
-import static com.kodilla.kodillacourse.Checkers.GameStatus.turnWhite;
+import static com.kodilla.kodillacourse.Checkers.GameStatus.*;
 import static com.kodilla.kodillacourse.Checkers.MoveExecutor.lastKiller;
 
 public class MoveVerificator {
@@ -18,7 +17,7 @@ public class MoveVerificator {
         isMakingQueen = false;
         moveType = MoveType.NONE;
         isItCorrectTurn(checker);
-        if (isDestinationWithinBoard(newCX, newCY) && correctTurn && tile.getColor() == Color.GREEN && !tile.hasChecker()) {
+        if (gameOn && isDestinationWithinBoard(newCX, newCY) && correctTurn && tile.getColor() == Color.GREEN && !tile.hasChecker()) {
                 defineMoveType(checker, tile);
                 if (moveType != MoveType.NONE) {
                     if (tile.getTileY() == 0 || tile.getTileY() == 7) {
@@ -64,7 +63,7 @@ public class MoveVerificator {
 
         Move kill = new Move(MoveType.KILL, checker, tile);
         for (Move possibleKill: possibleKills) {
-            if (kill.equals(possibleKill) && (!isBetweenKills || canCheckerKill(checker))) {
+            if (kill.equals(possibleKill) && (!isBetweenKills || checker.equals(lastKiller))) {
                 moveType = MoveType.KILL;
             }
         }

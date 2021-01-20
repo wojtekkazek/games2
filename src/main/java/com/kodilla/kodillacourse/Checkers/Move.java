@@ -22,6 +22,10 @@ public class Move {
         return newTile;
     }
 
+    public MoveType getMoveType() {
+        return moveType;
+    }
+
     @Override
     public String toString() {
         return "Move{" +

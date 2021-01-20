@@ -2,14 +2,23 @@ package com.kodilla.kodillacourse.Checkers;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.kodilla.kodillacourse.Checkers.Background.board;
 import static com.kodilla.kodillacourse.Checkers.Board.identifyTile;
-import static com.kodilla.kodillacourse.Checkers.GameStatus.turnWhite;
+import static com.kodilla.kodillacourse.Checkers.Board.tilesToHighlight;
+import static com.kodilla.kodillacourse.Checkers.GameStatus.*;
+import static com.kodilla.kodillacourse.Checkers.MoveExecutor.lastKiller;
 
 public class BoardAnalyzer {
 
-    private static List<Checker> checkersOfType;
+    public static int noOfWhiteCheckers;
+    public static int noOfWhiteQueens;
+    public static int noOfRedCheckers;
+    public static int noOfRedQueens;
+    public static CheckerType winner;
+
+    public static List<Checker> checkersOfType;
 
     public static List<Move> possibleMoves;
     public static List<Move> possibleMovesMakingQueen;
@@ -29,26 +38,83 @@ public class BoardAnalyzer {
         possibleMovesByQueen = new ArrayList<>();
         possibleKillsByQueen = new ArrayList<>();
 
+        updateQuantities();
+
         if (turnWhite) {
             correctType = CheckerType.WHITE;
         } else {
             correctType = CheckerType.RED;
         }
-        findAllCheckersOfType();
+        findAllCheckersOfType(correctType);
         findPossibleMoves();
         findPossibleKills();
         findPossibleMovesByQueen();
         findPossibleKillsByQueen();
         System.out.println("is kill possible? -" + (possibleKills.size() > 0 || possibleKillsByQueen.size() > 0));
+
+        updateHighlighting();
     }
 
-    public static void findAllCheckersOfType() {
+    public static void findAllCheckersOfType(CheckerType type) {
         checkersOfType = new ArrayList<>();
         for (Tile[] tileRow: board.getBoard()) {
             for(Tile tile: tileRow) {
-                if (tile.hasChecker() && tile.getChecker().getType() == correctType) {
+                if (tile.hasChecker() && tile.getChecker().getType() == type) {
                     checkersOfType.add(tile.getChecker());
                 }
+            }
+        }
+    }
+
+//    public static boolean didSomeoneWin() {
+//        if (noOfWhiteCheckers + noOfWhiteQueens == 0) {
+//            winner = CheckerType.RED;
+//            return true;
+//        }
+//        if (noOfRedCheckers + noOfRedQueens == 0) {
+//            winner = CheckerType.WHITE;
+//            return true;
+//        }
+//        return false;
+//    }
+
+    public static void updateQuantities() {
+        noOfWhiteCheckers = 0;
+        noOfWhiteQueens=0;
+        noOfRedCheckers=0;
+        noOfRedQueens=0;
+        findAllCheckersOfType(CheckerType.WHITE);
+        noOfWhiteCheckers = checkersOfType.stream()
+                .filter(c -> !c.isQueen())
+                .collect(Collectors.toList()).size();
+        noOfWhiteQueens = checkersOfType.size() - noOfWhiteCheckers;
+        findAllCheckersOfType(CheckerType.RED);
+        noOfRedCheckers = checkersOfType.stream()
+                .filter(c -> !c.isQueen())
+                .collect(Collectors.toList()).size();
+        noOfRedQueens = checkersOfType.size() - noOfRedCheckers;
+    }
+
+    public static void updateHighlighting() {
+        tilesToHighlight.getChildren().clear();
+        List<Move> allPossibleMovesIncludingKills = new ArrayList<>();
+        allPossibleMovesIncludingKills.addAll(possibleKills);
+        allPossibleMovesIncludingKills.addAll(possibleKillsByQueen);
+        if (allPossibleMovesIncludingKills.size() == 0) {
+            allPossibleMovesIncludingKills.addAll(possibleMoves);
+            allPossibleMovesIncludingKills.addAll(possibleMovesByQueen);
+        }
+        for (Move move: allPossibleMovesIncludingKills) {
+            tilesToHighlight.getChildren().add(new Highlighting(move.getNewTile().getTileX(), move.getNewTile().getTileY()));
+        }
+        if (isBetweenKills) {
+            tilesToHighlight.getChildren().clear();
+            List<Move> followingKillsToHighlight = allPossibleMovesIncludingKills.stream()
+                    .filter(m -> m.getMoveType() == MoveType.KILL || m.getMoveType() == MoveType.QUEENKILL)
+                    .filter(m -> m.getChecker() == lastKiller)
+                    .collect(Collectors.toList());
+            for (Move move: followingKillsToHighlight) {
+                tilesToHighlight.getChildren().add(new Highlighting(move.getNewTile().getTileX(), move.getNewTile().getTileY()));
             }
         }
     }

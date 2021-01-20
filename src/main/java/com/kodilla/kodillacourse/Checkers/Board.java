@@ -2,6 +2,8 @@ package com.kodilla.kodillacourse.Checkers;
 
 import javafx.scene.Group;
 
+import static com.kodilla.kodillacourse.Checkers.Background.board;
+
 public class Board {
 
     public static final int tileSize = 50;
@@ -11,6 +13,7 @@ public class Board {
     private static Tile[][] boardOfTiles = new Tile [width][height];
     public static Group tilesGroup = new Group();
     public static Group checkersGroup = new Group();
+    public static Group tilesToHighlight = new Group();
 
     public Board() {
         for (int y = 0; y < height; y++) {
@@ -48,6 +51,17 @@ public class Board {
         }
     }
 
+    public void resetCheckers() {
+        checkersGroup.getChildren().clear();
+        tilesToHighlight.getChildren().clear();
+        for (Tile[] tileRow: board.getBoard()) {
+            for(Tile tile: tileRow) {
+                tile.deleteChecker();
+            }
+        }
+        setCheckers();
+    }
+
     public static Tile identifyTileByCoordinates (double cX, double cY) {
         for(Tile[] tileRow: boardOfTiles) {
             for(Tile tile: tileRow) {
@@ -83,5 +97,9 @@ public class Board {
 
     public Group getCheckersGroup() {
         return checkersGroup;
+    }
+
+    public Group getTilesToHighlight() {
+        return tilesToHighlight;
     }
 }

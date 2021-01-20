@@ -6,8 +6,9 @@ import javafx.scene.shape.Circle;
 
 import java.util.Objects;
 
-import static com.kodilla.kodillacourse.Checkers.Board.identifyTileByCoordinates;
-import static com.kodilla.kodillacourse.Checkers.Board.tileSize;
+import static com.kodilla.kodillacourse.Checkers.Background.gamePaused;
+import static com.kodilla.kodillacourse.Checkers.Board.*;
+import static com.kodilla.kodillacourse.Checkers.GameStatus.gameOn;
 import static com.kodilla.kodillacourse.Checkers.MoveExecutor.executeMove;
 import static com.kodilla.kodillacourse.Checkers.MoveVerificator.verifyMove;
 
@@ -42,7 +43,11 @@ public class Checker extends StackPane {
         getChildren().addAll(circle);
 
         setOnMouseDragged(e -> {
-            relocate(e.getSceneX()-tileSize/2, e.getSceneY()-tileSize/2);
+            if (gameOn) {
+                relocate(e.getSceneX()-tileSize/2, e.getSceneY()-tileSize/2);
+            } else {
+                gamePaused.setText("GAME PAUSED OR NOT STARTED!");
+            }
         });
 
         setOnMouseReleased(e -> {
@@ -52,9 +57,11 @@ public class Checker extends StackPane {
     }
 
     public void move(double newCX, double newCY) {
-        Tile newTile = identifyTileByCoordinates(newCX, newCY);
-        MoveType moveType = verifyMove(this, newTile, newCX, newCY);
-        executeMove(this, newTile, moveType);
+        if (gameOn) {
+            Tile newTile = identifyTileByCoordinates(newCX, newCY);
+            MoveType moveType = verifyMove(this, newTile, newCX, newCY);
+            executeMove(this, newTile, moveType);
+        }
     }
 
     public Tile getTile() {
@@ -74,8 +81,10 @@ public class Checker extends StackPane {
     }
 
     public void setQueen(boolean queen) {
+        checkersGroup.getChildren().remove(this);
         isQueen = queen;
         getChildren().addAll(queenCircle);
+        checkersGroup.getChildren().add(this);
     }
 
     @Override

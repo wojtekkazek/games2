@@ -1,8 +1,7 @@
 package com.kodilla.kodillacourse.Checkers;
 
-import javafx.scene.Group;
-import javafx.scene.Node;
-
+import static com.kodilla.kodillacourse.Checkers.Background.giveUpButton;
+import static com.kodilla.kodillacourse.Checkers.Background.updateBackground;
 import static com.kodilla.kodillacourse.Checkers.Board.*;
 import static com.kodilla.kodillacourse.Checkers.BoardAnalyzer.*;
 import static com.kodilla.kodillacourse.Checkers.GameStatus.isBetweenKills;
@@ -21,6 +20,7 @@ public class MoveExecutor {
         int newY = newTile.getTileY();
 
         if (moveType == MoveType.NORMAL || moveType == MoveType.QUEENMOVE) {
+            System.out.println(checkersGroup);
             checkersGroup.getChildren().remove(checker);
             checker.getTile().deleteChecker();
             checker.setTile(newTile);
@@ -64,5 +64,9 @@ public class MoveExecutor {
         }
 
         analyzeBoard();
+        updateBackground();
+        if (checkersOfType.size() == 0) {
+            giveUpButton.fire();
+        }
     }
 }
