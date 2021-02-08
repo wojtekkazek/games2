@@ -8,9 +8,9 @@ import java.util.Objects;
 
 import static com.kodilla.kodillacourse.Checkers.Background.gamePaused;
 import static com.kodilla.kodillacourse.Checkers.Board.*;
-import static com.kodilla.kodillacourse.Checkers.GameStatus.gameOn;
+import static com.kodilla.kodillacourse.Checkers.CheckersApp.gameOn;
 import static com.kodilla.kodillacourse.Checkers.MoveExecutor.executeMove;
-import static com.kodilla.kodillacourse.Checkers.MoveVerificator.verifyMove;
+import static com.kodilla.kodillacourse.Checkers.MoveVerificator.verifyMoveAndDefineType;
 
 public class Checker extends StackPane {
 
@@ -18,11 +18,10 @@ public class Checker extends StackPane {
     private Tile tile;
     private CheckerType type;
     private boolean isQueen;
-//    private double pressedMouseCX;
-//    private double pressedMouseCY;
 
     Circle circle = new Circle(tileSize * 0.3);
     Circle queenCircle = new Circle(tileSize * 0.2);
+
 
     public Checker(int id, CheckerType type, boolean isQueen, Tile tile) {
         this.id = id;
@@ -59,8 +58,9 @@ public class Checker extends StackPane {
     public void move(double newCX, double newCY) {
         if (gameOn) {
             Tile newTile = identifyTileByCoordinates(newCX, newCY);
-            MoveType moveType = verifyMove(this, newTile, newCX, newCY);
-            executeMove(this, newTile, moveType);
+            MoveType moveType = verifyMoveAndDefineType(this, newCX, newCY);
+            Move move = new Move(moveType,this, newTile);
+            executeMove(move);
         }
     }
 
@@ -83,7 +83,11 @@ public class Checker extends StackPane {
     public void setQueen(boolean queen) {
         checkersGroup.getChildren().remove(this);
         isQueen = queen;
-        getChildren().addAll(queenCircle);
+        if (queen) {
+            getChildren().add(queenCircle);
+        } else {
+            getChildren().remove(queenCircle);
+        }
         checkersGroup.getChildren().add(this);
     }
 

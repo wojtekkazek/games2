@@ -25,6 +25,7 @@ public class Board {
         }
     }
 
+
     public void setCheckers() {
         int id = 0;
         for (int y = 0; y < height; y++) {
@@ -67,7 +68,6 @@ public class Board {
             for(Tile tile: tileRow) {
                 if (cX > tile.getTileX()*tileSize && cX < (tile.getTileX()+1)*tileSize &&
                         cY > tile.getTileY()*tileSize && cY < (tile.getTileY()+1)*tileSize) {
-//                    System.out.println(tile);
                     return tile;
                 }
             }

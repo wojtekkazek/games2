@@ -18,6 +18,14 @@ public class CheckersApp extends Application {
     public static Timeline timeline;
     Background background = new Background();
 
+    public static boolean gameOver = false;
+    public static boolean gameOn = false;
+    public static boolean turnWhite = true;
+    public static boolean isBetweenKills = false;
+    public static boolean isSimulationOngoing = false;
+    public static boolean modeSinglePlayer = false;
+    public static DifficultyLevel difficultyLevel;
+
     @Override
     public void start(Stage primaryStage) {
        background.setBackground(primaryStage);

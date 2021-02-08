@@ -4,28 +4,21 @@ import javafx.scene.paint.Color;
 
 import static com.kodilla.kodillacourse.Checkers.Board.*;
 import static com.kodilla.kodillacourse.Checkers.BoardAnalyzer.*;
-import static com.kodilla.kodillacourse.Checkers.GameStatus.*;
+import static com.kodilla.kodillacourse.Checkers.CheckersApp.*;
 import static com.kodilla.kodillacourse.Checkers.MoveExecutor.lastKiller;
 
 public class MoveVerificator {
 
     private static boolean correctTurn;
     public static MoveType moveType;
-    public static boolean isMakingQueen;
 
-    public static MoveType verifyMove(Checker checker, Tile tile, double newCX, double newCY) {
-        isMakingQueen = false;
+    public static MoveType verifyMoveAndDefineType(Checker checker, double newCX, double newCY) {
         moveType = MoveType.NONE;
         isItCorrectTurn(checker);
-        if (gameOn && isDestinationWithinBoard(newCX, newCY) && correctTurn && tile.getColor() == Color.GREEN && !tile.hasChecker()) {
-                defineMoveType(checker, tile);
-                if (moveType != MoveType.NONE) {
-                    if (tile.getTileY() == 0 || tile.getTileY() == 7) {
-                        isMakingQueen = true;
-                    }
-                }
+        Tile newTile = identifyTileByCoordinates(newCX, newCY);
+        if (gameOn && isDestinationWithinBoard(newCX, newCY) && correctTurn && newTile.getColor() == Color.GREEN && !newTile.hasChecker()) {
+                defineMoveType(checker, newTile);
         }
-        System.out.println("move was verified");
         return moveType;
     }
 
