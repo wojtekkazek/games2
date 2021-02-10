@@ -25,13 +25,8 @@ public class Round {
         return games;
     }
 
-    public List<Player> getPlayersInvolved() {
-        List<Player> playersInvolved = new ArrayList<>();
-        for (Game game: getGames()) {
-            playersInvolved.add(game.getFirstPlayer());
-            playersInvolved.add(game.getSecondPlayer());
-        }
-        return  playersInvolved;
+    public void emptyList() {
+        games = new ArrayList<>();
     }
 
 }
